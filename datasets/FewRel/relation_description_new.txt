@@ -1,0 +1,80 @@
+P931	place served by transport hub	territorial entity or entities served by this transport hub (airport, train station, etc.)	
+P4552	mountain range	range or subrange to which the geographical item belongs	
+P140	religion	religion of a person, organization or religious building, or associated with this subject	
+P1923	participating team	teams that actively takes/took part in an event or process	
+P150	contains administrative territorial entity	direct subdivisions of an administrative territorial entity	
+P6	head of government	head of the executive power of this town, city, municipality, state, country, or other governmental body	
+P27	country of citizenship	the object is a country that recognizes the subject as its citizen	
+P449	original network	network or service that originally broadcast a radio or television program	
+P1435	heritage designation	heritage designation of a cultural or natural site	
+P175	performer	actor, musician, band or other performer associated with this role or musical work	
+P1344	participant of	event in which a person or organization was/is a participant	
+P39	position held	subject currently or formerly holds the object position or public office	
+P527	has part	part of this subject	
+P740	location of formation	location where a group or organization was formed	
+P706	located on terrain feature	located on the specified physical/geophysical feature	
+P84	architect	person or architectural firm responsible for designing this building	
+P495	country of origin	country of origin of this item (creative work, food, phrase, product, etc.)	
+P123	publisher	organization or person responsible for publishing books, periodicals, printed music, podcasts, games or software	
+P57	director	director of film, TV-series, stageplay, video game or similar	
+P22	father	male parent of the subject	
+P178	developer	organization or person that developed the item	
+P241	military branch	branch to which this military unit, award, office, or person belongs	
+P403	mouth of the watercourse	the body of water to which the watercourse drains	
+P1411	nominated for	award nomination received by a person, organisation or creative work	
+P135	movement	literary, artistic, scientific or philosophical movement or scene associated with this person or work	
+P991	successful candidate	person elected after the election	
+P156	followed by	immediately following item in a series of which the subject is a part	
+P176	manufacturer	manufacturer or producer of this product	
+P31	instance of	that class of which this subject is a particular example and member	
+P1877	after a work by	artist whose work strongly inspired/ was copied in this item	
+P102	member of political party	the political party of which a person is or has been a member or otherwise affiliated	
+P1408	licensed to broadcast to	place that a radio/TV station is licensed/required to broadcast to	
+P159	headquarters location	city, where an organization's headquarters is or has been situated	
+P3373	sibling	the subject and the object have the same parents	
+P1303	instrument	musical instrument that a person plays or teaches or used in a music occupation	
+P17	country	sovereign state of this item (not to be used for human beings)	
+P106	occupation	occupation of a person	
+P551	residence	the place where the person is or has been, resident	
+P937	work location	location where persons or organisations were actively participating in employment, business or other work	
+P355	subsidiary	subsidiary of a company or organization; generally a fully owned separate corporation	
+P710	participant	person, group of people or organization (object) that actively takes/took part in an event or process	
+P137	operator	person, profession, or organization that operates the equipment, facility, or service	
+P674	characters	characters which appear in this item (like plays, operas, operettas, books, comics, films, TV series, video games)	
+P466	occupant	person or organization occupying property	
+P136	genre	creative work's genre or an artist's field of work	
+P306	operating system	operating system (OS) on which a software works or the OS installed on hardware	
+P127	owned by	owner of the subject	
+P400	platform	platform for which a work was developed or released, or the specific platform version of a software product	
+P974	tributary	watercourse that flows into an other one	
+P1346	winner	winner of a competition or similar event	
+P460	said to be the same as	this item is said to be the same as that item, but it's uncertain or disputed	
+P86	composer	person who wrote the music	
+P118	league	league in which team or player plays or has played in	
+P264	record label	brand and trademark associated with the marketing of subject music recordings and music videos	
+P750	distributor	distributor of a creative work; distributor for a record label; news agency; film distributor	
+P58	screenwriter	person who wrote the script for subject item	
+P3450	sports season of league or competition	property that shows the competition of which the item is a season	
+P105	taxon rank	level in a taxonomic hierarchy	
+P276	location	location of the object, structure or event	
+P101	field of work	specialization of a person or organization	
+P407	language of work or name	language associated with this creative work (such as books, shows, songs, broadcasts or websites) or a name	
+P1001	applies to jurisdiction	the item (institution, law, public office, public register...) or statement belongs to or has power over or applies to the value (a territorial jurisdiction: a country, state, municipality, ...)	
+P800	notable work	notable scientific, artistic or literary work, or other work of significance among subject's works	
+P131	located in the administrative territorial entity	the item is located on the territory of the following administrative entity	
+P177	crosses	obstacle which this bridge crosses over or this tunnel goes under	
+P364	original language of film or TV show	language in which a film or a performance work was originally created	
+P2094	competition class	official classification by a regulating body under which the subject (events, teams, participants, or equipment) qualifies for inclusion	
+P361	part of	object of which the subject is a part	
+P641	sport	sport that the subject participates or participated in or is associated with	
+P59	constellation	the area of the celestial sphere of which the subject is a part	
+P413	position played on team / speciality	position or specialism of a player on a team	
+P206	located in or next to body of water	body of water on or next to which a place is located	
+P412	voice type	person's voice type	
+P155	follows	immediately prior item in a series of which the subject is a part	
+P26	spouse	the subject has the object as their spouse (husband, wife, partner, etc.)	
+P410	military rank	military rank achieved by a person, or military rank associated with a position	
+P25	mother	female parent of the subject	
+P463	member of	organization, club or musical group to which the subject belongs	
+P40	child	subject has object as child	
+P921	main subject	primary topic of a work	
