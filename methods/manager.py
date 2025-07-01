@@ -45,6 +45,8 @@ class Manager(object):
         self.max_expert = -1
         self.eoeid2waveid = {}
         self.beta = args.beta
+        self.prompted_classifier = None
+        self.encoder = None
         # NgoDinhLuyen EoE
 
     def train_classifier(self, args, classifier, swag_classifier, replayed_epochs, name):
@@ -841,6 +843,8 @@ class Manager(object):
             if steps == 0:
                 self.train_encoder(args, encoder, cur_training_data, seen_descriptions, task_id=steps, beta=args.contrastive_loss_coeff)
 
+            self.encoder = encoder
+
             # new prompt pool
             if args.use_general_pp == 1:
                 self.prompt_pools.append(General_Prompt(args).to(args.device))
@@ -892,6 +896,8 @@ class Manager(object):
                 # classifier
                 prompted_classifier = Classifier(args=args).to(args.device)
                 swag_prompted_classifier = SWAG(Classifier, no_cov_mat=not (args.cov_mat), max_num_models=args.max_num_models, args=args)
+                
+                self.prompted_classifier = prompted_classifier
 
                 # train
                 self.train_classifier(args, classifier, swag_classifier, self.replayed_key, "train_classifier_epoch_")
@@ -959,3 +965,56 @@ class Manager(object):
         all_tasks, seen_data, results, encoder, 
         self.id2taskid, sampler, self.replayed_data, 
         self.replayed_key, test_cur, test_total
+        
+    @torch.no_grad()
+    def predict_and_print_each_sample(self, args, test_data, tokenizer=None, task_id=None):
+        self.encoder.eval()
+        self.prompted_classifier.eval()
+
+        batch_size = 1  # để xử lý từng mẫu một
+        data_loader = get_data_loader(args, test_data, batch_size=batch_size, shuffle=False)
+
+        for step, (labels, tokens, _) in enumerate(tqdm(data_loader, desc="Predicting")):
+            try:
+                targets = labels.type(torch.LongTensor).to(args.device)
+                tokens = torch.stack([x.to(args.device) for x in tokens], dim=0)
+
+                # 1. Chọn pool_ids và pred bước 1
+                # 2. Forward lần 1 để lấy encoder_out["x_encoded"]
+
+                # 3. Lấy prompt pool từ pool_ids
+                if task_id is not None:
+                    pool_ids = [task_id for _ in range(len(tokens))]
+                else:
+                    pool_ids, _ = self.choose_indices_eoe_tii(args, self.encoder, tokens, labels, batch_size)
+
+                prompt_pools = [self.prompt_pools[x] for x in pool_ids]
+
+                encoder_out = self.encoder(tokens)
+
+                # 4. Prompted encoder forward
+                prompted_encoder_out = self.encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
+
+                # 5. Predict
+                reps = self.prompted_classifier(prompted_encoder_out["x_encoded"])
+                probs = F.softmax(reps, dim=1)
+                _, pred = probs.max(1)
+
+                # 6. In kết quả
+                label_pred = pred.item()
+                label_true = targets.item()
+
+                # Convert tokens về chuỗi (nếu có tokenizer hoặc word mapping)
+                if tokenizer is not None:  # nếu bạn có tokenizer
+                    sentence = tokenizer.decode(tokens[0], skip_special_tokens=True)
+                else:
+                    sentence = str(tokens[0].tolist())  # fallback: in raw token ids
+
+                print(f"[{step}] Sentence: {sentence}")
+                print(f"    → Predicted label: {label_pred}")
+                print(f"    → Ground truth:   {label_true}")
+                print("-" * 60)
+
+            except Exception as e:
+                print(f"Error at step {step}: {e}")
+                continue
