@@ -465,11 +465,6 @@ class Manager(object):
         x_key = torch.cat(x_key, dim=0)
         x_encoded = torch.cat(x_encoded, dim=0)
 
-        #Save the first task's encoded features for visualization 
-        if task_id == 0:
-            np.save('encoded_task0.npy', x_encoded.cpu().detach().numpy())
-            print('save encoded features of task 0')
-
         key_mixture = GaussianMixture(n_components=args.gmm_num_components, random_state=args.seed).fit(x_key.cpu().detach().numpy())
         encoded_mixture = GaussianMixture(n_components=args.gmm_num_components, random_state=args.seed).fit(x_encoded.cpu().detach().numpy())
 
@@ -485,8 +480,13 @@ class Manager(object):
 
     def statistic(self, args, encoder, train_data, task_id):
         for i in range(-1, task_id + 1):
-            mean, cov, task_mean, task_cov = self.get_mean_and_cov(args=args, encoder=encoder, dataset=train_data, name="statistic", expert_id=i)
+            mean, cov, task_mean, task_cov, label_list, hidden_state_list = self.get_mean_and_cov(args=args, encoder=encoder, dataset=train_data, name="statistic", expert_id=i)
             self.new_statistic(args, mean, cov, task_mean, task_cov, i)
+
+            print('Save data for visualization')
+            np.save(f'hidden_state_{task_id}.npy', hidden_state_list)
+            np.save(f'Label_{task_id}.npy', label_list)
+            
     
     def new_statistic(self, args, mean, cov, task_mean, task_cov, i):
         expert_id = i + 1
@@ -509,14 +509,24 @@ class Manager(object):
         labels = []
         
         td = tqdm(data_loader, desc=name)
+
+        #hidden states and label list for visualization
+        hidden_state_list = []
+        label_list = []
+
         # testing
         for step, (label, tokens, _) in enumerate(td):            
             tokens = torch.stack([x.to(args.device) for x in tokens], dim=0)
+
             if expert_id == -1:
                 prompted_encoder_out = self.base_bert(input_ids=tokens,
                                             attention_mask= (tokens!=0))
+                hidden_state_list.append(prompted_encoder_out.cpu().detach().numpy())
+
             elif expert_id == 0:
                 prompted_encoder_out = encoder(tokens)
+                hidden_state_list.append(prompted_encoder_out.cpu().detach().numpy())
+
             else:
                 # encoder forward
                 encoder_out = encoder(tokens)
@@ -528,10 +538,15 @@ class Manager(object):
 
                 # prompted encoder forward
                 prompted_encoder_out = encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
+                hidden_state_list.append(prompted_encoder_out.cpu().detach().numpy())
+            
+            label_list.append(label.cpu().detach().numpy())
 
             # prediction
             prelogits.extend(prompted_encoder_out["x_encoded"].tolist())
             labels.extend(label.tolist())
+        
+
 
         prelogits = torch.tensor(prelogits)
         labels = torch.tensor(labels)
@@ -556,7 +571,7 @@ class Manager(object):
         mean_over_classes = torch.stack(mean_over_classes)
         shared_cov = torch.stack(cov_over_classes).mean(dim=0)
 
-        return mean_over_classes, shared_cov, task_mean, task_cov
+        return mean_over_classes, shared_cov, task_mean, task_cov, label_list, hidden_state_list
 
     def get_prompt_indices(self, args, prelogits, expert_id=0):
         expert_id = expert_id + 1
