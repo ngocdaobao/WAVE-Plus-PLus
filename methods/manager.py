@@ -465,6 +465,11 @@ class Manager(object):
         x_key = torch.cat(x_key, dim=0)
         x_encoded = torch.cat(x_encoded, dim=0)
 
+        #Save the first task's encoded features for visualization 
+        if task_id == 0:
+            np.save('encoded_task0.npy', x_encoded.cpu().detach().numpy())
+            print('save encoded features of task 0')
+
         key_mixture = GaussianMixture(n_components=args.gmm_num_components, random_state=args.seed).fit(x_key.cpu().detach().numpy())
         encoded_mixture = GaussianMixture(n_components=args.gmm_num_components, random_state=args.seed).fit(x_encoded.cpu().detach().numpy())
 
