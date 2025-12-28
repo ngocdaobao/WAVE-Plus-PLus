@@ -25,6 +25,8 @@ import wandb
 
 import logging
 
+import time
+
 logger = logging.getLogger(__name__)
 
 class Manager(object):
@@ -784,6 +786,8 @@ class Manager(object):
         return total_hits / sampled
 
     def train(self, args):
+        torch.cuda.synchronize()
+        start_time = time.time()
         # initialize test results list
         test_cur = []
         test_total = []
@@ -981,10 +985,17 @@ class Manager(object):
         all_tasks, seen_data, results, encoder, 
         self.id2taskid, sampler, self.replayed_data, 
         self.replayed_key, test_cur, test_total
+
+        torch.cuda.synchronize()
+        end_time = time.time()
+        print(f'Training Time: {end_time - start_time} seconds = {end_time - start_time}/3600 hours')
         
     @torch.no_grad()
     def predict_and_print_each_sample(self, args, test_data, tokenizer=None, task_id=None):
+        # Inference time
         self.encoder.eval()
+        torch.cuda.synchronize()
+        start_time = time.time()
         self.prompted_classifier.eval()
 
         batch_size = 1  # để xử lý từng mẫu một
@@ -1007,7 +1018,6 @@ class Manager(object):
                 prompt_pools = [self.prompt_pools[x] for x in pool_ids]
 
                 encoder_out = self.encoder(tokens)
-
                 # 4. Prompted encoder forward
                 prompted_encoder_out = self.encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
 
@@ -1034,3 +1044,7 @@ class Manager(object):
             except Exception as e:
                 print(f"Error at step {step}: {e}")
                 continue
+        torch.cuda.synchronize()
+        end_time = time.time()
+        print(f'Inference Time: {end_time - start_time} seconds = {end_time - start_time}/3600 hours')
+        
