@@ -480,14 +480,25 @@ class Manager(object):
 
     def statistic(self, args, encoder, train_data, task_id):
         for i in range(-1, task_id + 1):
-            mean, cov, task_mean, task_cov, label_list, hidden_state_list = self.get_mean_and_cov(args=args, encoder=encoder, dataset=train_data, name="statistic", expert_id=i)
+            os.makedirs(f'latent_statistics/task_{i+1}', exist_ok=True)
+            mean, cov, task_mean, task_cov, hidden_state_label = self.get_mean_and_cov(args=args, encoder=encoder, dataset=train_data, name="statistic", expert_id=i)
             self.new_statistic(args, mean, cov, task_mean, task_cov, i)
 
-            print('Save data for visualization')
-            np.save(f'hidden_state_{task_id}.npy', hidden_state_list)
-            np.save(f'Label_{task_id}.npy', label_list)
-            
-    
+            print('Save latent')
+            latent_dir = f'latent_statistics/task_{i+1}'
+            os.makedirs(latent_dir, exist_ok=True)
+            hidden_state_list = []
+            label_list = []
+            for h,l in hidden_state_label:
+                h = h.numpy()
+                l = l.numpy()
+                hidden_state_list.append(h)
+                label_list.append(l)
+            hidden_state_array = np.array(hidden_state_list)
+            label_array =  np.array(label_list)
+            np.save(os.path.join(latent_dir, f'hidden_states_task_{i+1}.npy'), hidden_state_array)
+            np.save(os.path.join(latent_dir, f'labels_task_{i+1}.npy'), label_array)
+
     def new_statistic(self, args, mean, cov, task_mean, task_cov, i):
         expert_id = i + 1
         if expert_id == 0 or expert_id == 1:
@@ -510,9 +521,6 @@ class Manager(object):
         
         td = tqdm(data_loader, desc=name)
 
-        #hidden states and label list for visualization
-        hidden_state_list = []
-        label_list = []
 
         # testing
         for step, (label, tokens, _) in enumerate(td):            
@@ -521,11 +529,9 @@ class Manager(object):
             if expert_id == -1:
                 prompted_encoder_out = self.base_bert(input_ids=tokens,
                                             attention_mask= (tokens!=0))
-                hidden_state_list.append(prompted_encoder_out.cpu().detach().numpy())
 
             elif expert_id == 0:
                 prompted_encoder_out = encoder(tokens)
-                hidden_state_list.append(prompted_encoder_out.cpu().detach().numpy())
 
             else:
                 # encoder forward
@@ -538,10 +544,7 @@ class Manager(object):
 
                 # prompted encoder forward
                 prompted_encoder_out = encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
-                hidden_state_list.append(prompted_encoder_out.cpu().detach().numpy())
             
-            label_list.append(label.cpu().detach().numpy())
-
             # prediction
             prelogits.extend(prompted_encoder_out["x_encoded"].tolist())
             labels.extend(label.tolist())
@@ -551,6 +554,11 @@ class Manager(object):
         prelogits = torch.tensor(prelogits)
         labels = torch.tensor(labels)
         labels_space = torch.unique(labels)
+
+        hidden_state_label = []
+        #Save prelogits and labels 
+        for latent, label in zip(prelogits, labels):
+            hidden_state_label.append((latent, label))
 
         task_mean = prelogits.mean(dim=0)
         task_cov = torch.cov((prelogits - task_mean).T)
@@ -571,7 +579,7 @@ class Manager(object):
         mean_over_classes = torch.stack(mean_over_classes)
         shared_cov = torch.stack(cov_over_classes).mean(dim=0)
 
-        return mean_over_classes, shared_cov, task_mean, task_cov, label_list, hidden_state_list
+        return mean_over_classes, shared_cov, task_mean, task_cov, hidden_state_label
 
     def get_prompt_indices(self, args, prelogits, expert_id=0):
         expert_id = expert_id + 1
