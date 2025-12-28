@@ -91,11 +91,8 @@ class Manager(object):
                     losses.append(loss.item())
                     loss.backward()
                     
-                    # log to wandb
-                    wandb.log({
-                        "classifier_loss": loss.item(),
-                        "classifier_acc": hits.mean().item()
-                    })
+                    # print logging instead of wandb
+                    print(f"[train_classifier] classifier_loss={loss.item():.6f}, classifier_acc={hits.mean().item():.4f}")
 
                     # params update
                     torch.nn.utils.clip_grad_norm_(modules_parameters, args.max_grad_norm)
@@ -253,12 +250,8 @@ class Manager(object):
                 losses.append(loss.item())
                 loss.backward()
                 
-                # log to wandb
-                wandb.log({
-                    "encoder_loss": loss.item(),
-                    "encoder_ce_loss": CE_loss.item(), 
-                    "encoder_ct_loss": CT_loss.item()
-                })
+                # print logging instead of wandb
+                print(f"[train_encoder] encoder_loss={loss.item():.6f}, encoder_ce_loss={CE_loss.item():.6f}, encoder_ct_loss={CT_loss.item():.6f}")
 
                 # params update
                 torch.nn.utils.clip_grad_norm_(modules_parameters, args.max_grad_norm)
@@ -422,13 +415,8 @@ class Manager(object):
                 losses.append(loss.item())
                 loss.backward()
                 
-                # log to wandb
-                wandb.log({
-                    "prompt_pool_loss": loss.item(),
-                    "prompt_pool_ce_loss": CE_loss.item(), 
-                    "prompt_pool_ct_loss": CT_loss.item(),
-                    "prompt_pool_reduce_sim_loss": prompt_reduce_sim_loss.item()
-                })
+                # print logging instead of wandb
+                print(f"[train_prompt_pool] loss={loss.item():.6f}, ce={CE_loss.item():.6f}, ct={CT_loss.item():.6f}, reduce_sim={prompt_reduce_sim_loss.item():.6f}")
 
                 # params update
                 torch.nn.utils.clip_grad_norm_(modules_parameters, args.max_grad_norm)
