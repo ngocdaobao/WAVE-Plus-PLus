@@ -699,6 +699,8 @@ class Manager(object):
     @torch.no_grad()
     def evaluate_strict_model(self, args, encoder, classifier, prompted_classifier, test_data, name, task_id):
         # models evaluation mode
+        torch.cuda.synchronize()
+        start_eval_time = time.time()
         encoder.eval()
         classifier.eval()
         
@@ -782,12 +784,12 @@ class Manager(object):
             except:
                 sampled -= len(labels)
                 continue
-        
+        torch.cuda.synchronize()
+        end_eval_time = time.time()
+        print(f"[evaluate_strict_model] {name} time={end_eval_time - start_eval_time:.2f}s = {(end_eval_time - start_eval_time)/3600:.2f} hours")
         return total_hits / sampled
 
     def train(self, args):
-        torch.cuda.synchronize()
-        start_time = time.time()
         # initialize test results list
         test_cur = []
         test_total = []
@@ -795,6 +797,13 @@ class Manager(object):
         # replayed data
         self.replayed_key = [[] for e_id in range(args.replay_epochs)]
         self.replayed_data = [[] for e_id in range(args.replay_epochs)]
+
+        # start training timer
+        try:
+            torch.cuda.synchronize()
+        except Exception:
+            pass
+        start_train_time = time.time()
 
         # sampler
         sampler = data_sampler(args=args, seed=args.seed)
@@ -823,9 +832,9 @@ class Manager(object):
         all_tasks = []
         seen_data = {}
 
+
         for steps, (training_data, valid_data, test_data, current_relations, 
                     historic_test_data, seen_relations, seen_descriptions) in enumerate(sampler):
-            
             # NgoDinhLuyen EoE
             self.num_tasks += 1
             # NgoDinhLuyen EoE
@@ -906,7 +915,6 @@ class Manager(object):
             all_train_tasks.append(cur_training_data)
             all_tasks.append(cur_test_data)
 
-            # evaluates
             need_evaluates = list(range(1, 11))
             if steps + 1 in need_evaluates:
                 # classifier
@@ -922,6 +930,7 @@ class Manager(object):
                 # train
                 self.train_classifier(args, classifier, swag_classifier, self.replayed_key, "train_classifier_epoch_")
                 self.train_classifier(args, prompted_classifier, swag_prompted_classifier, self.replayed_data, "train_prompted_classifier_epoch_")
+
 
                 # prediction
                 print("===NON-SWAG===")
@@ -978,17 +987,27 @@ class Manager(object):
                 result_file = f"{result_dir}/task_{steps}.pickle"
                 with open(result_file, "wb") as file:
                     pickle.dump(results, file)
+                
+        # compute and print total training time
+        try:
+            torch.cuda.synchronize()
+        except Exception:
+            pass
+        end_train_time = time.time()
+        train_time = end_train_time - start_train_time
+        print(f"Total training time: {train_time:.2f} seconds ({train_time/3600:.3f} hours)")
 
-
+        # cleanup
         del self.memorized_samples, 
         self.prompt_pools, all_train_tasks, 
         all_tasks, seen_data, results, encoder, 
         self.id2taskid, sampler, self.replayed_data, 
         self.replayed_key, test_cur, test_total
 
-        torch.cuda.synchronize()
-        end_time = time.time()
-        print(f'Training Time: {end_time - start_time} seconds = {end_time - start_time}/3600 hours')
+        # return training time (seconds)
+        return train_time
+
+    
         
     @torch.no_grad()
     def predict_and_print_each_sample(self, args, test_data, tokenizer=None, task_id=None):
