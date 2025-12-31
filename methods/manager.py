@@ -842,6 +842,7 @@ class Manager(object):
             print(f"current relations={current_relations}")
 
             self.steps = steps
+            print(f'step = {steps}')
             self.not_seen_rel_ids = [rel_id for rel_id in range(args.num_tasks * args.rel_per_task) if rel_id not in [self.rel2id[relation] for relation in seen_relations]]
 
             # initialize
