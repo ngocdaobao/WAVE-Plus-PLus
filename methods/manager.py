@@ -780,7 +780,7 @@ class Manager(object):
                 end_infer = time.time()
                 print(f'Latency Inference: {end_infer - start_infer}')
                 # display
-                td.set_postfix(acc=np.round(total_hits / sampled, 3))
+                # td.set_postfix(acc=np.round(total_hits / sampled, 3))
             except:
                 sampled -= len(labels)
                 continue
