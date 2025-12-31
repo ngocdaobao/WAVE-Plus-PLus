@@ -948,20 +948,20 @@ class Manager(object):
                 test_cur.append(cur_acc)
                 test_total.append(total_acc)
 
-                print("===SWAG===")
-                results = []
-                for i, i_th_test_data in enumerate(all_tasks):
-                    results.append([
-                        len(i_th_test_data), 
-                        self.evaluate_strict_model(args, encoder, swag_classifier, swag_prompted_classifier, 
-                                                   i_th_test_data, f"test_task_{i+1}", steps)
-                    ])
-                cur_acc = results[-1][1]
-                total_acc = sum([result[0] * result[1] for result in results]) / sum([result[0] for result in results])
-                print(f"current test accuracy: {cur_acc}")
-                print(f"history test accuracy: {total_acc}")
-                test_cur.append(cur_acc)
-                test_total.append(total_acc)
+                # print("===SWAG===")
+                # results = []
+                # for i, i_th_test_data in enumerate(all_tasks):
+                #     results.append([
+                #         len(i_th_test_data), 
+                #         self.evaluate_strict_model(args, encoder, swag_classifier, swag_prompted_classifier, 
+                #                                    i_th_test_data, f"test_task_{i+1}", steps)
+                #     ])
+                # cur_acc = results[-1][1]
+                # total_acc = sum([result[0] * result[1] for result in results]) / sum([result[0] for result in results])
+                # print(f"current test accuracy: {cur_acc}")
+                # print(f"history test accuracy: {total_acc}")
+                # test_cur.append(cur_acc)
+                # test_total.append(total_acc)
 
                 acc_sum =[]
                 print("===UNTIL-NOW===")
