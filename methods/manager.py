@@ -778,7 +778,8 @@ class Manager(object):
                 total_hits[3] += (pred == targets).float().sum().data.cpu().numpy().item()
                 torch.cuda.synchronize()
                 end_infer = time.time()
-                print(f'Latency Inference: {end_infer - start_infer}')
+                latency = end_infer - start_infer
+                print(f'Latency Inference: {latency:.6f} s')
                 # display
                 # td.set_postfix(acc=np.round(total_hits / sampled, 3))
             except:
