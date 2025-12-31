@@ -39,8 +39,7 @@ def run(args):
     # for seed in [2421, 2021]:
         # args.seed = seed
     manager = Manager(args)
-    # manager.train(args)
-    manager.latent_inferency(args)
+    manager.train(args)
 
 if __name__ == "__main__":
     # Load configuration

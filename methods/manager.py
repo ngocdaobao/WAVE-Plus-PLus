@@ -699,8 +699,6 @@ class Manager(object):
     @torch.no_grad()
     def evaluate_strict_model(self, args, encoder, classifier, prompted_classifier, test_data, name, task_id):
         # models evaluation mode
-        torch.cuda.synchronize()
-
         encoder.eval()
         classifier.eval()
         
@@ -779,8 +777,8 @@ class Manager(object):
                 # accuracy_3
                 total_hits[3] += (pred == targets).float().sum().data.cpu().numpy().item()
                 torch.cuda.synchronize()
-                end_time = time.time()
-                print(f'Latency Inference: {end_time - start_time}')
+                end_infer = time.time()
+                print(f'Latency Inference: {end_infer - start_infer}')
                 # display
                 td.set_postfix(acc=np.round(total_hits / sampled, 3))
             except:
@@ -868,8 +866,8 @@ class Manager(object):
             # NgoDinhLuyen EoE
 
             # train encoder
-            if steps == 0:
-                self.train_encoder(args, encoder, cur_training_data, seen_descriptions, task_id=steps, beta=args.contrastive_loss_coeff)
+            # if steps == 0:
+            #     self.train_encoder(args, encoder, cur_training_data, seen_descriptions, task_id=steps, beta=args.contrastive_loss_coeff)
 
             self.encoder = encoder
 
@@ -878,9 +876,9 @@ class Manager(object):
                 self.prompt_pools.append(General_Prompt(args).to(args.device))
             else:
                 self.prompt_pools.append(Prompt(args).to(args.device))
-            self.train_prompt_pool(args, encoder, self.prompt_pools[-1], 
-                                   cur_training_data, seen_descriptions,
-                                   task_id=steps, beta=args.contrastive_loss_coeff)
+            # self.train_prompt_pool(args, encoder, self.prompt_pools[-1], 
+            #                        cur_training_data, seen_descriptions,
+            #                        task_id=steps, beta=args.contrastive_loss_coeff)
 
             # NgoDinhLuyen EoE
             self.statistic(args, encoder, cur_training_data, steps)
@@ -927,8 +925,9 @@ class Manager(object):
                 self.prompted_classifier = prompted_classifier
 
                 # train
-                self.train_classifier(args, classifier, swag_classifier, self.replayed_key, "train_classifier_epoch_")
-                self.train_classifier(args, prompted_classifier, swag_prompted_classifier, self.replayed_data, "train_prompted_classifier_epoch_")
+                # if args.eoe_tii != "yes":
+                #     self.train_classifier(args, classifier, swag_classifier, self.replayed_key, "train_classifier_epoch_")
+                # self.train_classifier(args, prompted_classifier, swag_prompted_classifier, self.replayed_data, "train_prompted_classifier_epoch_")
 
 
                 # prediction
