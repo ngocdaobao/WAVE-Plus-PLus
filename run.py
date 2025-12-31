@@ -3,10 +3,7 @@ import torch
 from config import Param
 from methods.utils import setup_seed
 from methods.manager import Manager
-import wandb
-from dotenv import load_dotenv
 import os
-os.environ['WANDB_MODE'] = 'disabled' # disable wandb for this script
 
 import logging
 import sys
@@ -47,17 +44,7 @@ if __name__ == "__main__":
     param = Param()
     args = param.args
     
-    # wandb
-    load_dotenv()
-    
-    wandb_api_key = "0806b2d5c00870a95f366d95c825d7680649abb7"  # Thay YOUR_WANDB_API_KEY bằng API key thực tế của bạn
-
-    os.environ["WANDB_API_KEY"] = wandb_api_key
-    
-    wandb.login()
-
-    # start a new wandb run to track this script
-
+    # ensure run name exists
     if args.run_name is None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")  # Thêm timestamp
         args.run_name = f"{args.dataname}_{args.seed}_{args.num_descriptions}_{args.prompt_pool_size}_{args.prompt_length}_{args.prompt_top_k}_{timestamp}"
@@ -80,15 +67,8 @@ if __name__ == "__main__":
     # Ghi cả print() vào file log
     sys.stdout = Logger(log_filename)
     sys.stderr = sys.stdout  # Để ghi cả lỗi vào file
-    
-    wandb.init(
-        # set the wandb project where this run will be logged
-        project="Final_wave",
-        name = args.run_name,
 
-        # track hyperparameters and run metadata
-        config=args.__dict__,
-    )
+    logging.info("Wandb support removed. Running without wandb logging.")
 
     # Device
     torch.cuda.set_device(args.gpu)
@@ -111,4 +91,4 @@ if __name__ == "__main__":
     # Run
     run(args)
     
-    wandb.finish()
+    logging.info("Run finished.")
