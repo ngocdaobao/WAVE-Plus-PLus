@@ -724,6 +724,7 @@ class Manager(object):
                 sampled += len(labels)
                 targets = labels.type(torch.LongTensor).to(args.device)
                 tokens = torch.stack([x.to(args.device) for x in tokens], dim=0)
+                torch.cuda.synchronize()
                 start_infer = time.time()
                 if args.eoe_tii == "yes":
                     pool_ids, pred  = self.choose_indices_eoe_tii(args, encoder, tokens, labels, batch_size)
@@ -777,6 +778,7 @@ class Manager(object):
 
                 # accuracy_3
                 total_hits[3] += (pred == targets).float().sum().data.cpu().numpy().item()
+                torch.cuda.synchronize()
                 end_time = time.time()
                 print(f'Latency Inference: {end_time - start_time}')
                 # display
@@ -784,9 +786,6 @@ class Manager(object):
             except:
                 sampled -= len(labels)
                 continue
-        torch.cuda.synchronize()
-        end_eval_time = time.time()
-        print(f"[evaluate_strict_model] {name} time={end_eval_time - start_eval_time:.2f}s = {(end_eval_time - start_eval_time)/3600:.2f} hours")
         return total_hits / sampled
 
     def train(self, args):
@@ -1118,6 +1117,7 @@ class Manager(object):
                         self.evaluate_strict_model(args, encoder, classifier, prompted_classifier, 
                                                     i_th_test_data, f"test_task_{i+1}", steps)
                     ])      
+
 
 
 
