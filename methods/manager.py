@@ -989,6 +989,8 @@ class Manager(object):
                 result_file = f"{result_dir}/task_{steps}.pickle"
                 with open(result_file, "wb") as file:
                     pickle.dump(results, file)
+            #if training with one task only, break
+            break
 
 
         del self.memorized_samples, 
