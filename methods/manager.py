@@ -700,7 +700,7 @@ class Manager(object):
     def evaluate_strict_model(self, args, encoder, classifier, prompted_classifier, test_data, name, task_id):
         # models evaluation mode
         torch.cuda.synchronize()
-        start_eval_time = time.time()
+
         encoder.eval()
         classifier.eval()
         
@@ -724,8 +724,7 @@ class Manager(object):
                 sampled += len(labels)
                 targets = labels.type(torch.LongTensor).to(args.device)
                 tokens = torch.stack([x.to(args.device) for x in tokens], dim=0)
-
-                # NgoDinhLuyen EoE
+                start_infer = time.time()
                 if args.eoe_tii == "yes":
                     pool_ids, pred  = self.choose_indices_eoe_tii(args, encoder, tokens, labels, batch_size)
                 else:
@@ -778,7 +777,8 @@ class Manager(object):
 
                 # accuracy_3
                 total_hits[3] += (pred == targets).float().sum().data.cpu().numpy().item()
-
+                end_time = time.time()
+                print(f'Latency Inference: {end_time - start_time}')
                 # display
                 td.set_postfix(acc=np.round(total_hits / sampled, 3))
             except:
@@ -1067,3 +1067,4 @@ class Manager(object):
         end_time = time.time()
         print(f'Inference Time: {end_time - start_time} seconds = {end_time - start_time}/3600 hours')
         
+
