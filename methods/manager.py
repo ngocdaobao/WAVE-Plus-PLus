@@ -1081,6 +1081,7 @@ class Manager(object):
         all_train_tasks = []
         all_tasks = []
         seen_data = {}
+        self.id2taskid = {}
 
         for steps, (training_data, valid_data, test_data, current_relations, 
                     historic_test_data, seen_relations, seen_descriptions) in enumerate(sampler):
@@ -1117,5 +1118,6 @@ class Manager(object):
                         self.evaluate_strict_model(args, encoder, classifier, prompted_classifier, 
                                                     i_th_test_data, f"test_task_{i+1}", steps)
                     ])      
+
 
 
