@@ -91,7 +91,7 @@ class Manager(object):
                     loss.backward()
                     
                     # log to console instead of wandb
-                    logger.info(f"[train_classifier] classifier_loss={loss.item():.6f}, classifier_acc={hits.mean().item():.4f}")
+                    print(f"[train_classifier] classifier_loss={loss.item():.6f}, classifier_acc={hits.mean().item():.4f}")
 
                     # params update
                     torch.nn.utils.clip_grad_norm_(modules_parameters, args.max_grad_norm)
@@ -250,7 +250,7 @@ class Manager(object):
                 loss.backward()
                 
                 # log to console instead of wandb
-                logger.info(f"[train_encoder] encoder_loss={loss.item():.6f}, encoder_ce_loss={CE_loss.item():.6f}, encoder_ct_loss={CT_loss.item():.6f}")
+                print(f"[train_encoder] encoder_loss={loss.item():.6f}, encoder_ce_loss={CE_loss.item():.6f}, encoder_ct_loss={CT_loss.item():.6f}")
 
                 # params update
                 torch.nn.utils.clip_grad_norm_(modules_parameters, args.max_grad_norm)
@@ -415,7 +415,7 @@ class Manager(object):
                 loss.backward()
                 
                 # log to console instead of wandb
-                logger.info(f"[train_prompt_pool] loss={loss.item():.6f}, ce={CE_loss.item():.6f}, ct={CT_loss.item():.6f}, reduce_sim={prompt_reduce_sim_loss.item():.6f}")
+                print(f"[train_prompt_pool] loss={loss.item():.6f}, ce={CE_loss.item():.6f}, ct={CT_loss.item():.6f}, reduce_sim={prompt_reduce_sim_loss.item():.6f}")
 
                 # params update
                 torch.nn.utils.clip_grad_norm_(modules_parameters, args.max_grad_norm)
@@ -930,7 +930,10 @@ class Manager(object):
                     end_train_time = time.time()
                     train_time = end_train_time - start_train_time
                     print(f"Train time for classifier on task {steps+1}: {train_time} seconds")
-
+                    #Save train time to a file
+                    with open(f'./{args.dataname}_train_time.txt', 'w') as f:
+                        f.write(f'Train encoder = {train_encoder_time} seconds, Train time = {train_time} seconds\n')
+    
                 # prediction
                 print("===NON-SWAG===")
                 results = []

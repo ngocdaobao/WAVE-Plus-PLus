@@ -68,7 +68,7 @@ if __name__ == "__main__":
     sys.stdout = Logger(log_filename)
     sys.stderr = sys.stdout  # Để ghi cả lỗi vào file
 
-    logging.info("Wandb support removed. Running without wandb logging.")
+    print("Wandb support removed. Running without wandb logging.")
 
     # Device
     torch.cuda.set_device(args.gpu)
@@ -91,4 +91,4 @@ if __name__ == "__main__":
     # Run
     run(args)
     
-    logging.info("Run finished.")
+    print("Run finished.")
