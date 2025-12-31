@@ -41,7 +41,6 @@ def run(args):
     manager = Manager(args)
     manager.train(args)
 
-
 if __name__ == "__main__":
     # Load configuration
     param = Param()
@@ -108,3 +107,4 @@ if __name__ == "__main__":
     
     # wandb.finish removed; run finished
     print("Run finished.")
+
