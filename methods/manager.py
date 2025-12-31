@@ -21,7 +21,7 @@ from sklearn.mixture import GaussianMixture
 
 from tqdm import tqdm, trange
 import pickle
-
+import time
 import logging
 
 logger = logging.getLogger(__name__)
@@ -856,9 +856,16 @@ class Manager(object):
 
             # train encoder
             if steps == 0:
+                train_encoder_start = time.time()
                 self.train_encoder(args, encoder, cur_training_data, seen_descriptions, task_id=steps, beta=args.contrastive_loss_coeff)
-
+                train_encoder_end = time.time()
+                train_encoder_time = train_encoder_end - train_encoder_start
+                print(f"Train encoder time for task {steps+1}: {train_encoder_time} seconds")
             self.encoder = encoder
+
+            if steps == 0:
+                # Compute training time 
+                start_train_time = time.time()
 
             # new prompt pool
             if args.use_general_pp == 1:
@@ -918,6 +925,11 @@ class Manager(object):
                 if args.use_eoe_tii != "yes":
                     self.train_classifier(args, classifier, swag_classifier, self.replayed_key, "train_classifier_epoch_")
                 self.train_classifier(args, prompted_classifier, swag_prompted_classifier, self.replayed_data, "train_prompted_classifier_epoch_")
+
+                if steps == 0:
+                    end_train_time = time.time()
+                    train_time = end_train_time - start_train_time
+                    print(f"Train time for classifier on task {steps+1}: {train_time} seconds")
 
                 # prediction
                 print("===NON-SWAG===")
