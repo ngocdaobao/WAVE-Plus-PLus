@@ -39,7 +39,8 @@ def run(args):
     # for seed in [2421, 2021]:
         # args.seed = seed
     manager = Manager(args)
-    manager.train(args)
+    # manager.train(args)
+    manager.latent_inferency(args)
 
 if __name__ == "__main__":
     # Load configuration
@@ -107,4 +108,5 @@ if __name__ == "__main__":
     
     # wandb.finish removed; run finished
     print("Run finished.")
+
 
