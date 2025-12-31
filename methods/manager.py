@@ -922,7 +922,7 @@ class Manager(object):
                 self.prompted_classifier = prompted_classifier
 
                 # train
-                if args.use_eoe_tii != "yes":
+                if args.eoe_tii != "yes":
                     self.train_classifier(args, classifier, swag_classifier, self.replayed_key, "train_classifier_epoch_")
                 self.train_classifier(args, prompted_classifier, swag_prompted_classifier, self.replayed_data, "train_prompted_classifier_epoch_")
 
