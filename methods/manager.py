@@ -1068,7 +1068,7 @@ class Manager(object):
         print(f'Inference Time: {end_time - start_time} seconds = {end_time - start_time}/3600 hours')
         
     def latent_inferency(self, args):
-        encoder = self.encoder
+        encoder = BertRelationEncoder(config=args).to(args.device)
         classifier = Classifier(args=args).to(args.device)
         swag_classifier = SWAG(Classifier, no_cov_mat=not (args.cov_mat), max_num_models=args.max_num_models, args=args)
         prompted_classifier = Classifier(args=args).to(args.device)
@@ -1118,6 +1118,7 @@ class Manager(object):
                         self.evaluate_strict_model(args, encoder, classifier, prompted_classifier, 
                                                     i_th_test_data, f"test_task_{i+1}", steps)
                     ])      
+
 
 
 
