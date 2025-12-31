@@ -1067,4 +1067,55 @@ class Manager(object):
         end_time = time.time()
         print(f'Inference Time: {end_time - start_time} seconds = {end_time - start_time}/3600 hours')
         
+    def latent_inferency(self, args):
+        encoder = self.encoder
+        classifier = Classifier(args=args).to(args.device)
+        swag_classifier = SWAG(Classifier, no_cov_mat=not (args.cov_mat), max_num_models=args.max_num_models, args=args)
+        prompted_classifier = Classifier(args=args).to(args.device)
+        swag_prompted_classifier = SWAG(Classifier, no_cov_mat=not (args.cov_mat), max_num_models=args.max_num_models, args=args)
+
+        sampler = data_sampler(args=args, seed=args.seed)
+        self.rel2id = sampler.rel2id
+        self.id2rel = sampler.id2rel
+
+        all_train_tasks = []
+        all_tasks = []
+        seen_data = {}
+
+        for steps, (training_data, valid_data, test_data, current_relations, 
+                    historic_test_data, seen_relations, seen_descriptions) in enumerate(sampler):
+            for i, relation in enumerate(current_relations):
+                self.num_tasks += 1
+                # NgoDinhLuyen EoE
+                
+                print("=" * 100)
+                print(f"task={steps+1}")
+                print(f"current relations={current_relations}")
+
+                self.steps = steps
+                self.not_seen_rel_ids = [rel_id for rel_id in range(args.num_tasks * args.rel_per_task) if rel_id not in [self.rel2id[relation] for relation in seen_relations]]
+
+                # initialize
+                cur_training_data = []
+                cur_test_data = []
+                id_cur_data = []
+                for i, relation in enumerate(current_relations):
+                    cur_training_data += training_data[relation]
+                    seen_data[relation] = training_data[relation]
+                    cur_test_data += test_data[relation]
+
+                    rel_id = self.rel2id[relation]
+                    self.id2taskid[rel_id] = steps
+                    id_cur_data.append(rel_id)
+                all_train_tasks.append(cur_training_data)
+                all_tasks.append(cur_test_data)
+                print("===NON-SWAG===")
+                results = []
+                for i, i_th_test_data in enumerate(all_tasks):
+                    results.append([
+                        len(i_th_test_data), 
+                        self.evaluate_strict_model(args, encoder, classifier, prompted_classifier, 
+                                                    i_th_test_data, f"test_task_{i+1}", steps)
+                    ])      
+
 
