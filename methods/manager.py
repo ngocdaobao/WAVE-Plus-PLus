@@ -314,80 +314,80 @@ class Manager(object):
                 encoder_out = encoder(tokens, prompt_pool, x_key)
                 
                 # New 
-                if args.type_ctloss == "new":
-                    if step % 50 ==0:
-                        negative_dict = self.find_negative_labels(args, encoder, seen_description)
+                # if args.type_ctloss == "new":
+                #     if step % 50 ==0:
+                #         negative_dict = self.find_negative_labels(args, encoder, seen_description)
                     
-                    all_description_label_need_cal = []
+                #     all_description_label_need_cal = []
                     
-                    for label in labels:
-                        label = int(label)
-                        if label not in all_description_label_need_cal:
-                            all_description_label_need_cal.append(label)
-                        for lab in negative_dict[label]:
-                            if lab not in all_description_label_need_cal:
-                                all_description_label_need_cal.append(lab)
+                #     for label in labels:
+                #         label = int(label)
+                #         if label not in all_description_label_need_cal:
+                #             all_description_label_need_cal.append(label)
+                #         for lab in negative_dict[label]:
+                #             if lab not in all_description_label_need_cal:
+                #                 all_description_label_need_cal.append(lab)
                     
-                    description_out = {}
+                #     description_out = {}
                     
-                    if args.strategy == 1:
-                        for rel, descriptions in seen_description.items():
-                            if self.rel2id[rel] in all_description_label_need_cal:
-                                temp = []
-                                for description in descriptions:
-                                    des_tokens = torch.tensor([description['token_ids']]).to(args.device)
-                                    temp.append(encoder(des_tokens, extract_type="cls")["cls_representation"])
-                                temp = torch.stack(temp, dim=0)
-                                temp = torch.mean(temp, dim=0)
+                #     if args.strategy == 1:
+                #         for rel, descriptions in seen_description.items():
+                #             if self.rel2id[rel] in all_description_label_need_cal:
+                #                 temp = []
+                #                 for description in descriptions:
+                #                     des_tokens = torch.tensor([description['token_ids']]).to(args.device)
+                #                     temp.append(encoder(des_tokens, extract_type="cls")["cls_representation"])
+                #                 temp = torch.stack(temp, dim=0)
+                #                 temp = torch.mean(temp, dim=0)
                                 
-                                description_out[self.rel2id[rel]] = temp
-                    elif args.strategy == 2:
-                        apply_grad_list = random.sample(all_description_label_need_cal, min(args.num_grad_description_per_step, len(all_description_label_need_cal)))
+                #                 description_out[self.rel2id[rel]] = temp
+                #     elif args.strategy == 2:
+                #         apply_grad_list = random.sample(all_description_label_need_cal, min(args.num_grad_description_per_step, len(all_description_label_need_cal)))
                         
-                        for rel, descriptions in seen_description.items():
-                            if self.rel2id[rel] in all_description_label_need_cal:
-                                if self.rel2id[rel] in apply_grad_list:
-                                    temp = []
-                                    for description in descriptions:
-                                        des_tokens = torch.tensor([description['token_ids']]).to(args.device)
-                                        temp.append(encoder(des_tokens, extract_type="cls")["cls_representation"])
-                                    temp = torch.stack(temp, dim=0)
-                                    temp = torch.mean(temp, dim=0)
+                #         for rel, descriptions in seen_description.items():
+                #             if self.rel2id[rel] in all_description_label_need_cal:
+                #                 if self.rel2id[rel] in apply_grad_list:
+                #                     temp = []
+                #                     for description in descriptions:
+                #                         des_tokens = torch.tensor([description['token_ids']]).to(args.device)
+                #                         temp.append(encoder(des_tokens, extract_type="cls")["cls_representation"])
+                #                     temp = torch.stack(temp, dim=0)
+                #                     temp = torch.mean(temp, dim=0)
                     
-                                    description_out[self.rel2id[rel]] = temp   
-                                else:
-                                    with torch.no_grad():
-                                        temp = []
-                                        for description in descriptions:
-                                            des_tokens = torch.tensor([description['token_ids']]).to(args.device)
-                                            temp.append(encoder(des_tokens, extract_type="cls")["cls_representation"])
-                                        temp = torch.stack(temp, dim=0)
-                                        temp = torch.mean(temp, dim=0)
+                #                     description_out[self.rel2id[rel]] = temp   
+                #                 else:
+                #                     with torch.no_grad():
+                #                         temp = []
+                #                         for description in descriptions:
+                #                             des_tokens = torch.tensor([description['token_ids']]).to(args.device)
+                #                             temp.append(encoder(des_tokens, extract_type="cls")["cls_representation"])
+                #                         temp = torch.stack(temp, dim=0)
+                #                         temp = torch.mean(temp, dim=0)
                         
-                                        description_out[self.rel2id[rel]] = temp  
-                    elif args.strategy == 3:
-                        for rel, descriptions in seen_description.items():
-                            if self.rel2id[rel] in all_description_label_need_cal:
-                                temp = []
-                                description = random.choice(descriptions)
-                                des_tokens = torch.tensor([description['token_ids']]).to(args.device)
-                                temp = encoder(des_tokens, extract_type="cls")["cls_representation"]
+                #                         description_out[self.rel2id[rel]] = temp  
+                #     elif args.strategy == 3:
+                #         for rel, descriptions in seen_description.items():
+                #             if self.rel2id[rel] in all_description_label_need_cal:
+                #                 temp = []
+                #                 description = random.choice(descriptions)
+                #                 des_tokens = torch.tensor([description['token_ids']]).to(args.device)
+                #                 temp = encoder(des_tokens, extract_type="cls")["cls_representation"]
                                 
-                                description_out[self.rel2id[rel]] = temp 
-                # New   
-                else:
-                # Old
-                    description_out = {}
-                    for rel, descriptions in seen_description.items():
-                        temp = []
-                        for description in descriptions:
-                            des_tokens = torch.tensor([description['token_ids']]).to(args.device)
-                            temp.append(encoder(des_tokens, extract_type="cls")["cls_representation"])
-                        temp = torch.stack(temp, dim=0)
-                        temp = torch.mean(temp, dim=0)
+                #                 description_out[self.rel2id[rel]] = temp 
+                # # New   
+                # else:
+                # # Old
+                #     description_out = {}
+                #     for rel, descriptions in seen_description.items():
+                #         temp = []
+                #         for description in descriptions:
+                #             des_tokens = torch.tensor([description['token_ids']]).to(args.device)
+                #             temp.append(encoder(des_tokens, extract_type="cls")["cls_representation"])
+                #         temp = torch.stack(temp, dim=0)
+                #         temp = torch.mean(temp, dim=0)
                         
-                        description_out[self.rel2id[rel]] = temp
-                # Old
+                #         description_out[self.rel2id[rel]] = temp
+                # # Old
                 
                 # classifier forward
                 reps = classifier(encoder_out["x_encoded"])
@@ -937,17 +937,14 @@ class Manager(object):
                 self.prompted_classifier = prompted_classifier
 
                 # train
-                if args.eoe_tii != "yes":
-                    self.train_classifier(args, classifier, swag_classifier, self.replayed_key, "train_classifier_epoch_")
-                self.train_classifier(args, prompted_classifier, swag_prompted_classifier, self.replayed_data, "train_prompted_classifier_epoch_")
+                # if args.eoe_tii != "yes":
+                #     self.train_classifier(args, classifier, swag_classifier, self.replayed_key, "train_classifier_epoch_")
+                # self.train_classifier(args, prompted_classifier, swag_prompted_classifier, self.replayed_data, "train_prompted_classifier_epoch_")
 
                 if steps == 0:
                     end_train_time = time.time()
                     train_time = end_train_time - start_train_time
                     print(f"Train time for classifier on task {steps+1}: {train_time} seconds")
-                    #Save train time to a file
-                    with open(f'./{args.dataname}_train_time.txt', 'w') as f:
-                        f.write(f'Train encoder = {train_encoder_time} seconds, Train time = {train_time} seconds\n')
     
                 # prediction
                 print("===NON-SWAG===")
