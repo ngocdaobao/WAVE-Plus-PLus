@@ -870,13 +870,13 @@ class Manager(object):
             # NgoDinhLuyen EoE
 
             # train encoder
-            if steps == 0:
-                train_encoder_start = time.time()
-                self.train_encoder(args, encoder, cur_training_data, seen_descriptions, task_id=steps, beta=args.contrastive_loss_coeff)
-                train_encoder_end = time.time()
-                train_encoder_time = train_encoder_end - train_encoder_start
-                print(f"Train encoder time for task {steps+1}: {train_encoder_time} seconds")
-            self.encoder = encoder
+            # if steps == 0:
+            #     train_encoder_start = time.time()
+            #     self.train_encoder(args, encoder, cur_training_data, seen_descriptions, task_id=steps, beta=args.contrastive_loss_coeff)
+            #     train_encoder_end = time.time()
+            #     train_encoder_time = train_encoder_end - train_encoder_start
+            #     print(f"Train encoder time for task {steps+1}: {train_encoder_time} seconds")
+            # self.encoder = encoder
 
             if steps == 0:
                 # Compute training time 
