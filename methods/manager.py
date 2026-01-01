@@ -732,7 +732,10 @@ class Manager(object):
                 # NgoDinhLuyen EoE
 
                 pool_ids = [self.id2taskid[int(labels[0])]]
-                
+
+
+                torch.cuda_synchronize()
+                start_time = time.time()
                 # encoder forward
                 encoder_out = encoder(tokens)
 
@@ -760,6 +763,11 @@ class Manager(object):
                 reps = prompted_classifier(prompted_encoder_out["x_encoded"])
                 probs = F.softmax(reps, dim=1)
                 _, pred = probs.max(1)
+
+                torch.cuda_synchronize()
+                end_time = time.time()
+                inference_time = end_time - start_time
+                print(f'Latent Inference time: {inference_time} seconds')
 
                 # accuracy_2
                 total_hits[2] += (pred == targets).float().sum().data.cpu().numpy().item()
