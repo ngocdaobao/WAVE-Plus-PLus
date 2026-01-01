@@ -401,21 +401,25 @@ class Manager(object):
                 prompt_reduce_sim_loss = -args.pull_constraint_coeff * encoder_out["reduce_sim"]
                 CE_loss = F.cross_entropy(input=reps, target=targets, reduction="mean")
                 
-                if args.type_ctloss == "new":
-                # New
-                    CT_loss =  new_contrastive_loss(encoder_out["x_encoded"], targets, description_out, negative_dict, args.num_descriptions) # constractive loss
-                # New
-                else:
-                # Old
-                    CT_loss =  contrastive_loss(encoder_out["x_encoded"], targets, description_out, num_negs=args.num_negs) # constractive loss
-                # Old
+                # Using contrastive loss
+                # if args.type_ctloss == "new":
+                # # New
+                #     CT_loss =  new_contrastive_loss(encoder_out["x_encoded"], targets, description_out, negative_dict, args.num_descriptions) # constractive loss
+                # # New
+                # else:
+                # # Old
+                #     CT_loss =  contrastive_loss(encoder_out["x_encoded"], targets, description_out, num_negs=args.num_negs) # constractive loss
+                # # Old
                 
-                loss = CE_loss + prompt_reduce_sim_loss + CT_loss*self.beta
+                # loss = CE_loss + prompt_reduce_sim_loss + CT_loss*self.beta
+                loss = CE_loss + prompt_reduce_sim_loss
                 losses.append(loss.item())
                 loss.backward()
                 
                 # log to console instead of wandb
-                print(f"[train_prompt_pool] loss={loss.item():.6f}, ce={CE_loss.item():.6f}, ct={CT_loss.item():.6f}, reduce_sim={prompt_reduce_sim_loss.item():.6f}")
+                # print(f"[train_prompt_pool] loss={loss.item():.6f}, ce={CE_loss.item():.6f}, ct={CT_loss.item():.6f}, reduce_sim={prompt_reduce_sim_loss.item():.6f}")
+                print(f"[train_prompt_pool] loss={loss.item():.6f}, ce={CE_loss.item():.6f}, reduce_sim={prompt_reduce_sim_loss.item():.6f}")
+
 
                 # params update
                 torch.nn.utils.clip_grad_norm_(modules_parameters, args.max_grad_norm)
@@ -727,6 +731,8 @@ class Manager(object):
                     pool_ids, pred = self.choose_indices_wave(args, encoder, tokens, classifier)
                 # NgoDinhLuyen EoE
 
+                pool_ids = [self.id2taskid[int(labels[0])]]
+                
                 # encoder forward
                 encoder_out = encoder(tokens)
 
@@ -745,6 +751,7 @@ class Manager(object):
 
                 # get pools
                 prompt_pools = [self.prompt_pools[x] for x in pool_ids]
+                print(f'Prompt pools used: {prompt_pools}')
 
                 # prompted encoder forward
                 prompted_encoder_out = encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
@@ -888,21 +895,21 @@ class Manager(object):
                                            f"sampling_relation_{i+1}={relation}", steps)
 
             # replay data for classifier
-            for relation in current_relations:
-                print(f"replaying data {relation}")
-                rel_id = self.rel2id[relation]
-                replay_data = self.memorized_samples[rel_id]["replay"].sample(args.replay_epochs * args.replay_s_e_e)[0].astype("float32")
-                for e_id in range(args.replay_epochs):
-                    for x_encoded in replay_data[e_id * args.replay_s_e_e : (e_id + 1) * args.replay_s_e_e]:
-                        self.replayed_data[e_id].append({"relation": rel_id, "tokens": x_encoded})
+            # for relation in current_relations:
+            #     print(f"replaying data {relation}")
+            #     rel_id = self.rel2id[relation]
+            #     replay_data = self.memorized_samples[rel_id]["replay"].sample(args.replay_epochs * args.replay_s_e_e)[0].astype("float32")
+            #     for e_id in range(args.replay_epochs):
+            #         for x_encoded in replay_data[e_id * args.replay_s_e_e : (e_id + 1) * args.replay_s_e_e]:
+            #             self.replayed_data[e_id].append({"relation": rel_id, "tokens": x_encoded})
 
-            for relation in current_relations:
-                print(f"replaying key {relation}")
-                rel_id = self.rel2id[relation]
-                replay_key = self.memorized_samples[rel_id]["replay_key"].sample(args.replay_epochs * args.replay_s_e_e)[0].astype("float32")
-                for e_id in range(args.replay_epochs):
-                    for x_encoded in replay_key[e_id * args.replay_s_e_e : (e_id + 1) * args.replay_s_e_e]:
-                        self.replayed_key[e_id].append({"relation": rel_id, "tokens": x_encoded})
+            # for relation in current_relations:
+            #     print(f"replaying key {relation}")
+            #     rel_id = self.rel2id[relation]
+            #     replay_key = self.memorized_samples[rel_id]["replay_key"].sample(args.replay_epochs * args.replay_s_e_e)[0].astype("float32")
+            #     for e_id in range(args.replay_epochs):
+            #         for x_encoded in replay_key[e_id * args.replay_s_e_e : (e_id + 1) * args.replay_s_e_e]:
+            #             self.replayed_key[e_id].append({"relation": rel_id, "tokens": x_encoded})
 
             # all
             all_train_tasks.append(cur_training_data)
