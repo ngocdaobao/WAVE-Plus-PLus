@@ -879,7 +879,7 @@ class Manager(object):
             #     train_encoder_end = time.time()
             #     train_encoder_time = train_encoder_end - train_encoder_start
             #     print(f"Train encoder time for task {steps+1}: {train_encoder_time} seconds")
-            # self.encoder = encoder
+            self.encoder = encoder
 
             if steps == 0:
                 # Compute training time 
