@@ -721,7 +721,6 @@ class Manager(object):
         for step, (labels, tokens, _) in enumerate(td):
             print(self.id2taskid)
             try:
-
                 sampled += len(labels)
                 targets = labels.type(torch.LongTensor).to(args.device)
                 tokens = torch.stack([x.to(args.device) for x in tokens], dim=0)
