@@ -756,6 +756,11 @@ class Manager(object):
                 reps = prompted_classifier(prompted_encoder_out["x_encoded"])
                 probs = F.softmax(reps, dim=1)
                 _, pred = probs.max(1)
+                #End time
+                torch.cuda.synchronize()
+                end_infer = time.time()
+                latency = end_infer - start_infer
+                print(f'Latency Inference: {latency:.6f} s')
 
                 # accuracy_2
                 total_hits[2] += (pred == targets).float().sum().data.cpu().numpy().item()
@@ -776,10 +781,6 @@ class Manager(object):
 
                 # accuracy_3
                 total_hits[3] += (pred == targets).float().sum().data.cpu().numpy().item()
-                torch.cuda.synchronize()
-                end_infer = time.time()
-                latency = end_infer - start_infer
-                print(f'Latency Inference: {latency:.6f} s')
                 # display
                 # td.set_postfix(acc=np.round(total_hits / sampled, 3))
             except:
@@ -1118,6 +1119,7 @@ class Manager(object):
                         self.evaluate_strict_model(args, encoder, classifier, prompted_classifier, 
                                                     i_th_test_data, f"test_task_{i+1}", steps)
                     ])      
+
 
 
 
