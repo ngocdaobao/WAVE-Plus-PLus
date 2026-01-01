@@ -792,6 +792,7 @@ class Manager(object):
                 # display
                 # td.set_postfix(acc=np.round(total_hits / sampled, 3))
             except:
+                print("Skipping batch due to error.")
                 sampled -= len(labels)
                 continue
         
