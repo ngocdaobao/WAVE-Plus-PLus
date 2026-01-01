@@ -744,8 +744,8 @@ class Manager(object):
             # probs = F.softmax(reps, dim=1)
             # _, pred = probs.max(1)
 
-            # accuracy_0
-            total_hits[0] += (pred == targets).float().sum().data.cpu().numpy().item()
+            # # accuracy_0
+            # total_hits[0] += (pred == targets).float().sum().data.cpu().numpy().item()
 
             # pool_ids
             # pool_ids = [self.id2taskid[int(x)] for x in pred]
