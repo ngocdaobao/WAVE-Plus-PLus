@@ -719,7 +719,7 @@ class Manager(object):
 
         # testing
         for step, (labels, tokens, _) in enumerate(td):
-            print(self.id2taskid)
+            # print(self.id2taskid)
             try:
                 sampled += len(labels)
                 targets = labels.type(torch.LongTensor).to(args.device)
@@ -755,7 +755,7 @@ class Manager(object):
 
                 # get pools
                 prompt_pools = [self.prompt_pools[x] for x in pool_ids]
-                print(f'Prompt pools used: {prompt_pools}')
+                # print(f'Prompt pools used: {prompt_pools}')
 
                 # prompted encoder forward
                 prompted_encoder_out = encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
@@ -768,7 +768,7 @@ class Manager(object):
                 torch.cuda.synchronize()
                 end_time = time.time()
                 inference_time = end_time - start_time
-                print(f'Latent Inference time: {inference_time} seconds')
+                # print(f'Latent Inference time: {inference_time} seconds')
 
                 # accuracy_2
                 total_hits[2] += (pred == targets).float().sum().data.cpu().numpy().item()
@@ -874,18 +874,17 @@ class Manager(object):
             })
             # NgoDinhLuyen EoE
 
-            # train encoder
-            # if steps == 0:
-            #     train_encoder_start = time.time()
-            #     self.train_encoder(args, encoder, cur_training_data, seen_descriptions, task_id=steps, beta=args.contrastive_loss_coeff)
-            #     train_encoder_end = time.time()
-            #     train_encoder_time = train_encoder_end - train_encoder_start
-            #     print(f"Train encoder time for task {steps+1}: {train_encoder_time} seconds")
-            self.encoder = encoder
+            torch.cuda.synchronize()
+            start_task_time = time.time()
 
+            # train encoder
             if steps == 0:
-                # Compute training time 
-                start_train_time = time.time()
+                train_encoder_start = time.time()
+                self.train_encoder(args, encoder, cur_training_data, seen_descriptions, task_id=steps, beta=args.contrastive_loss_coeff)
+                train_encoder_end = time.time()
+                train_encoder_time = train_encoder_end - train_encoder_start
+                print(f"Train encoder time for task {steps+1}: {train_encoder_time} seconds")
+            self.encoder = encoder
 
             # new prompt pool
             if args.use_general_pp == 1:
@@ -895,6 +894,11 @@ class Manager(object):
             self.train_prompt_pool(args, encoder, self.prompt_pools[-1], 
                                    cur_training_data, seen_descriptions,
                                    task_id=steps, beta=args.contrastive_loss_coeff)
+
+            torch.cuda.synchronize()
+            end_task_time = time.time()
+            task_time = end_task_time - start_task_time
+            print(f"Total time for task {steps+1}: {task_time} seconds")
 
             # NgoDinhLuyen EoE
             self.statistic(args, encoder, cur_training_data, steps)
@@ -946,10 +950,6 @@ class Manager(object):
                 #     self.train_classifier(args, classifier, swag_classifier, self.replayed_key, "train_classifier_epoch_")
                 # self.train_classifier(args, prompted_classifier, swag_prompted_classifier, self.replayed_data, "train_prompted_classifier_epoch_")
 
-                if steps == 0:
-                    end_train_time = time.time()
-                    train_time = end_train_time - start_train_time
-                    print(f"Train time for classifier on task {steps+1}: {train_time} seconds")
     
                 # prediction
                 print("===NON-SWAG===")
