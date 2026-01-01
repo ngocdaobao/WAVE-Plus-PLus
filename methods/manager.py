@@ -795,7 +795,8 @@ class Manager(object):
                 sampled -= len(labels)
                 continue
         
-        return total_hits / sampled
+        # return total_hits / sampled
+        return inference_time
 
     def train(self, args):
         # initialize test results list
