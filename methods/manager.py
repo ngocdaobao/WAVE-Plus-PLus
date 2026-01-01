@@ -836,9 +836,11 @@ class Manager(object):
         all_tasks = []
         seen_data = {}
 
+        torch.cuda.synchronize()
+        start_total_time = time.time()
+
         for steps, (training_data, valid_data, test_data, current_relations, 
                     historic_test_data, seen_relations, seen_descriptions) in enumerate(sampler):
-            
             # NgoDinhLuyen EoE
             self.num_tasks += 1
             # NgoDinhLuyen EoE
@@ -1005,8 +1007,10 @@ class Manager(object):
                 with open(result_file, "wb") as file:
                     pickle.dump(results, file)
             #if training with one task only, break
-            break
-
+        torch.cuda.synchronize()
+        end_total_time = time.time()
+        total_time = end_total_time - start_total_time
+        print(f"Total training time: {total_time} seconds")    
 
         del self.memorized_samples, 
         self.prompt_pools, all_train_tasks, 
