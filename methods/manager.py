@@ -720,81 +720,85 @@ class Manager(object):
         # testing
         for step, (labels, tokens, _) in enumerate(td):
             print(self.id2taskid)
-            sampled += len(labels)
-            targets = labels.type(torch.LongTensor).to(args.device)
-            tokens = torch.stack([x.to(args.device) for x in tokens], dim=0)
+            try:
+                sampled += len(labels)
+                targets = labels.type(torch.LongTensor).to(args.device)
+                tokens = torch.stack([x.to(args.device) for x in tokens], dim=0)
 
-            # NgoDinhLuyen EoE
-            # if args.eoe_tii == "yes":
-            #     pool_ids, pred  = self.choose_indices_eoe_tii(args, encoder, tokens, labels, batch_size)
-            # else:
-            #     pool_ids, pred = self.choose_indices_wave(args, encoder, tokens, classifier)
-            # # NgoDinhLuyen EoE
+                # NgoDinhLuyen EoE
+                # if args.eoe_tii == "yes":
+                #     pool_ids, pred  = self.choose_indices_eoe_tii(args, encoder, tokens, labels, batch_size)
+                # else:
+                #     pool_ids, pred = self.choose_indices_wave(args, encoder, tokens, classifier)
+                # # NgoDinhLuyen EoE
 
-            pool_ids = [0]
+                pool_ids = [self.id2taskid[int(labels[0])]]
 
 
-            torch.cuda.synchronize()
-            start_time = time.time()
-            # encoder forward
-            encoder_out = encoder(tokens)
+                torch.cuda.synchronize()
+                start_time = time.time()
+                # encoder forward
+                encoder_out = encoder(tokens)
 
-            # # prediction
-            # reps = classifier(encoder_out["x_encoded"])
-            # probs = F.softmax(reps, dim=1)
-            # _, pred = probs.max(1)
+                # prediction
+                reps = classifier(encoder_out["x_encoded"])
+                probs = F.softmax(reps, dim=1)
+                _, pred = probs.max(1)
 
-            # # accuracy_0
-            # total_hits[0] += (pred == targets).float().sum().data.cpu().numpy().item()
+                # accuracy_0
+                total_hits[0] += (pred == targets).float().sum().data.cpu().numpy().item()
 
-            # pool_ids
-            # pool_ids = [self.id2taskid[int(x)] for x in pred]
-            for i, pool_id in enumerate(pool_ids):
-                total_hits[1] += pool_id == self.id2taskid[int(labels[i])]
+                # pool_ids
+                # pool_ids = [self.id2taskid[int(x)] for x in pred]
+                for i, pool_id in enumerate(pool_ids):
+                    total_hits[1] += pool_id == self.id2taskid[int(labels[i])]
 
-            # get pools
-            prompt_pools = [self.prompt_pools[x] for x in pool_ids]
-            print(f'Prompt pools used: {prompt_pools}')
+                # get pools
+                prompt_pools = [self.prompt_pools[x] for x in pool_ids]
+                print(f'Prompt pools used: {prompt_pools}')
 
-            # prompted encoder forward
-            prompted_encoder_out = encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
+                # prompted encoder forward
+                prompted_encoder_out = encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
 
-            # prediction
-            reps = prompted_classifier(prompted_encoder_out["x_encoded"])
-            probs = F.softmax(reps, dim=1)
-            _, pred = probs.max(1)
+                # prediction
+                reps = prompted_classifier(prompted_encoder_out["x_encoded"])
+                probs = F.softmax(reps, dim=1)
+                _, pred = probs.max(1)
 
-            torch.cuda.synchronize()
-            end_time = time.time()
-            inference_time = end_time - start_time
-            print(f'Latent Inference time: {inference_time} seconds')
+                torch.cuda.synchronize()
+                end_time = time.time()
+                inference_time = end_time - start_time
+                print(f'Latent Inference time: {inference_time} seconds')
 
-                # # accuracy_2
-                # total_hits[2] += (pred == targets).float().sum().data.cpu().numpy().item()
+                # accuracy_2
+                total_hits[2] += (pred == targets).float().sum().data.cpu().numpy().item()
 
-                # # pool_ids
-                # pool_ids = [self.id2taskid[int(x)] for x in labels]
+                # pool_ids
+                pool_ids = [self.id2taskid[int(x)] for x in labels]
 
-                # # get pools
-                # prompt_pools = [self.prompt_pools[x] for x in pool_ids]
+                # get pools
+                prompt_pools = [self.prompt_pools[x] for x in pool_ids]
 
-                # # prompted encoder forward
-                # prompted_encoder_out = encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
+                # prompted encoder forward
+                prompted_encoder_out = encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
 
-                # # prediction
-                # reps = prompted_classifier(prompted_encoder_out["x_encoded"])
-                # probs = F.softmax(reps, dim=1)
-                # _, pred = probs.max(1)
+                # prediction
+                reps = prompted_classifier(prompted_encoder_out["x_encoded"])
+                probs = F.softmax(reps, dim=1)
+                _, pred = probs.max(1)
 
-                # # accuracy_3
-                # total_hits[3] += (pred == targets).float().sum().data.cpu().numpy().item()
+                # accuracy_3
+                total_hits[3] += (pred == targets).float().sum().data.cpu().numpy().item()
 
                 # display
                 # td.set_postfix(acc=np.round(total_hits / sampled, 3))
-
+            except:
+                print("Skipping batch due to error.")
+                sampled -= len(labels)
+                continue
         
         # return total_hits / sampled
-        return inference_time
+        return total_hits
 
     def train(self, args):
         # initialize test results list
