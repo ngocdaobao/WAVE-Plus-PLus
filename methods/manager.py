@@ -734,7 +734,7 @@ class Manager(object):
             pool_ids = [0]
 
 
-            torch.cuda_synchronize()
+            torch.cuda.synchronize()
             start_time = time.time()
             # encoder forward
             encoder_out = encoder(tokens)
@@ -764,7 +764,7 @@ class Manager(object):
             probs = F.softmax(reps, dim=1)
             _, pred = probs.max(1)
 
-            torch.cuda_synchronize()
+            torch.cuda.synchronize()
             end_time = time.time()
             inference_time = end_time - start_time
             print(f'Latent Inference time: {inference_time} seconds')
