@@ -790,7 +790,7 @@ class Manager(object):
                 total_hits[3] += (pred == targets).float().sum().data.cpu().numpy().item()
 
                 # display
-                td.set_postfix(acc=np.round(total_hits / sampled, 3))
+                # td.set_postfix(acc=np.round(total_hits / sampled, 3))
             except:
                 sampled -= len(labels)
                 continue
