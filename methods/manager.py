@@ -733,7 +733,7 @@ class Manager(object):
                 #     pool_ids, pred = self.choose_indices_wave(args, encoder, tokens, classifier)
                 # # NgoDinhLuyen EoE
 
-                pool_ids = [self.id2taskid[int(labels[0])]]
+                pool_ids = [self.id2taskid.items()[0]]
 
 
                 torch.cuda_synchronize()
