@@ -769,25 +769,25 @@ class Manager(object):
                 inference_time = end_time - start_time
                 print(f'Latent Inference time: {inference_time} seconds')
 
-                # accuracy_2
-                total_hits[2] += (pred == targets).float().sum().data.cpu().numpy().item()
+                # # accuracy_2
+                # total_hits[2] += (pred == targets).float().sum().data.cpu().numpy().item()
 
-                # pool_ids
-                pool_ids = [self.id2taskid[int(x)] for x in labels]
+                # # pool_ids
+                # pool_ids = [self.id2taskid[int(x)] for x in labels]
 
-                # get pools
-                prompt_pools = [self.prompt_pools[x] for x in pool_ids]
+                # # get pools
+                # prompt_pools = [self.prompt_pools[x] for x in pool_ids]
 
-                # prompted encoder forward
-                prompted_encoder_out = encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
+                # # prompted encoder forward
+                # prompted_encoder_out = encoder(tokens, None, encoder_out["x_encoded"], prompt_pools)
 
-                # prediction
-                reps = prompted_classifier(prompted_encoder_out["x_encoded"])
-                probs = F.softmax(reps, dim=1)
-                _, pred = probs.max(1)
+                # # prediction
+                # reps = prompted_classifier(prompted_encoder_out["x_encoded"])
+                # probs = F.softmax(reps, dim=1)
+                # _, pred = probs.max(1)
 
-                # accuracy_3
-                total_hits[3] += (pred == targets).float().sum().data.cpu().numpy().item()
+                # # accuracy_3
+                # total_hits[3] += (pred == targets).float().sum().data.cpu().numpy().item()
 
                 # display
                 # td.set_postfix(acc=np.round(total_hits / sampled, 3))
